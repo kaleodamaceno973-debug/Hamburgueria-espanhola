@@ -1,0 +1,6 @@
+{
+  "name": "Baka Vieja Burger Shop",
+  "description": "Especialistas en carne desde 2019 en Bilbao, Zaragoza y Burgos. Hamburguesas gourmet sin tonterías, patatas brutales y nachos míticos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

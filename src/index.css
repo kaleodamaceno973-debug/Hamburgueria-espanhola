@@ -1,0 +1,151 @@
+@import "tailwindcss";
+@import "@fontsource/rubik/700.css";
+@import "@fontsource/rubik/900.css";
+@import "@fontsource/dm-sans/400.css";
+@import "@fontsource/dm-sans/400-italic.css";
+@import "@fontsource/dm-sans/500.css";
+@import "@fontsource/dm-sans/700.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bv-black: #000000;
+  --bv-surface: #0b0b0c;
+  --bv-surface-elevated: #141416;
+  --bv-white: #ffffff;
+  --bv-peach: #ffbc7d;
+  --bv-gold: #ffb547;
+  --bv-yellow: #f2e23a;
+  --bv-border: rgba(255, 255, 255, 0.1);
+}
+
+html,
+body {
+  background-color: #000000;
+  color: #ffffff;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: clip;
+  scroll-behavior: auto;
+}
+
+.font-display {
+  font-family: "Rubik", sans-serif;
+}
+
+.font-bambino {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Studio photo radial edge mask so studio black photos melt seamlessly into #000000 */
+.studio-mask {
+  -webkit-mask-image: radial-gradient(ellipse 84% 84% at 50% 48%, #000 58%, rgba(0, 0, 0, 0.65) 80%, transparent 100%);
+  mask-image: radial-gradient(ellipse 84% 84% at 50% 48%, #000 58%, rgba(0, 0, 0, 0.65) 80%, transparent 100%);
+}
+
+/* Static neon text glow (never animate filter or box-shadow) */
+.neon-text-gold {
+  color: #ffb547;
+  text-shadow:
+    0 0 8px rgba(255, 181, 71, 0.55),
+    0 0 24px rgba(255, 181, 71, 0.28);
+}
+
+.neon-text-yellow {
+  color: #f2e23a;
+  text-shadow:
+    0 0 8px rgba(242, 226, 58, 0.5),
+    0 0 22px rgba(242, 226, 58, 0.24);
+}
+
+.neon-svg-layer {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+.neon-svg-gold {
+  filter: drop-shadow(0 0 10px rgba(255, 181, 71, 0.65)) drop-shadow(0 0 28px rgba(255, 181, 71, 0.3));
+  /* own GPU layer: the glow is rasterised once; flicker/scroll only change opacity/transform */
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+.neon-line-gold {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 181, 71, 0.65) 50%, transparent 100%);
+}
+
+/* Subtle SVG data-URI film grain overlay (pure CSS/SVG, zero external file) */
+.film-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+}
+
+/* Masked line-reveal utility */
+.line-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.line-inner {
+  display: block;
+  will-change: transform;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid #ffb547;
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for dark drawers */
+[data-lenis-prevent]::-webkit-scrollbar {
+  width: 6px;
+}
+[data-lenis-prevent]::-webkit-scrollbar-track {
+  background: #0b0b0c;
+}
+[data-lenis-prevent]::-webkit-scrollbar-thumb {
+  background: rgba(255, 181, 71, 0.35);
+  border-radius: 9999px;
+}
+
+/* Hide native cursor only when custom cow cursor is active on pointer:fine */
+@media (hover: hover) and (pointer: fine) {
+  body.custom-cursor-ready,
+  body.custom-cursor-ready a,
+  body.custom-cursor-ready button {
+    cursor: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line-inner {
+    transform: none !important;
+  }
+}
+
+@keyframes bvFlyToCart {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(calc(100vw - 96px - 50vw), calc(100vh - 96px - 50vh), 0) scale(0.28);
+    opacity: 0;
+  }
+}
+
+.bv-fly-particle {
+  animation: bvFlyToCart 650ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+
+/* Mobile: reserve room for the fixed bottom order bar so it never covers content or the footer */
+@media (max-width: 639px) {
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+}
