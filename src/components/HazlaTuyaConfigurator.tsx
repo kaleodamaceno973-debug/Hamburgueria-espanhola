@@ -219,7 +219,7 @@ export default function HazlaTuyaConfigurator({
       ref={sectionRef}
       aria-labelledby="hazla-tuya-title"
       className={`relative w-full bg-[#0B0B0B] border-y border-white/10 ${
-        reducedMotion ? 'py-16 sm:py-24' : 'min-h-[100svh] flex items-center py-6 sm:py-10 pb-20 lg:pb-10'
+        reducedMotion ? 'py-16 sm:py-24' : 'min-h-[100svh] flex items-start pt-[104px] pb-24 sm:items-center sm:py-10 lg:pb-10'
       }`}
     >
       {/* Subtle static ambient ember behind burger stage */}
@@ -232,127 +232,64 @@ export default function HazlaTuyaConfigurator({
         <div className="grid grid-cols-1 items-center gap-5 lg:grid-cols-12 lg:gap-10">
           {/* Burger Layer Visual Assembly Stage */}
           <div className="lg:col-span-6 flex flex-col items-center justify-center">
-            <div className="relative flex h-[215px] w-full max-w-[320px] flex-col items-center justify-center sm:h-[300px] sm:max-w-[390px] lg:h-[430px] lg:max-w-[440px]">
-              {/* Top Bun Crown */}
-              <div
-                className="relative z-[60] w-[74%] transition-transform duration-300 ease-out"
-                style={{
-                  transform: `translateY(${showSalsa ? '18%' : showExtras ? '8%' : showQueso ? '0%' : '-12%'})`,
-                }}
-              >
-                <img
-                  key={selectedPan.id + '-top'}
-                  src={selectedPan.imagen}
-                  alt={`Parte superior de ${selectedPan.nombre}`}
-                  width={selectedPan.width}
-                  height={selectedPan.height}
-                  className="mx-auto h-auto max-h-[68px] sm:max-h-[95px] lg:max-h-[125px] w-auto object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.75)]"
-                />
-              </div>
-
-              {/* 06 Salsa */}
-              <div
-                className={`relative z-[55] -my-3 w-[68%] transition-all duration-300 ease-out ${
-                  showSalsa ? 'opacity-100 scale-100' : 'pointer-events-none h-0 overflow-hidden opacity-0 scale-90'
-                }`}
-              >
-                {selectedSalsa.imagen && (
-                  <img
-                    key={selectedSalsa.id}
-                    src={selectedSalsa.imagen}
-                    alt={selectedSalsa.nombre}
-                    width={selectedSalsa.width}
-                    height={selectedSalsa.height}
-                    className="mx-auto h-auto max-h-[38px] sm:max-h-[48px] lg:max-h-[60px] w-auto object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.7)]"
-                  />
-                )}
-              </div>
-
-              {/* 05 Extras */}
-              <div
-                className={`relative z-50 -my-2.5 flex w-[72%] flex-col items-center transition-all duration-300 ease-out ${
-                  showExtras ? 'opacity-100 translate-y-0' : 'pointer-events-none h-0 overflow-hidden opacity-0 -translate-y-4'
-                }`}
-              >
-                {selectedExtras.map((extra, idx) => (
-                  <img
-                    key={extra.id}
-                    src={extra.imagen}
-                    alt={extra.nombre}
-                    width={extra.width}
-                    height={extra.height}
-                    className={`mx-auto h-auto max-h-[36px] sm:max-h-[46px] lg:max-h-[58px] w-auto object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.7)] ${
-                      idx > 0 ? '-mt-4' : ''
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* 04 Vegetales */}
-              <div
-                className={`relative z-40 -my-2.5 flex w-[74%] flex-col items-center transition-all duration-300 ease-out ${
-                  showVegetales ? 'opacity-100 translate-y-0' : 'pointer-events-none h-0 overflow-hidden opacity-0 -translate-y-4'
-                }`}
-              >
-                {selectedVegs.slice(0, 3).map((veg, idx) => (
-                  <img
-                    key={veg.id}
-                    src={veg.imagen}
-                    alt={veg.nombre}
-                    width={veg.width}
-                    height={veg.height}
-                    className={`mx-auto h-auto max-h-[30px] sm:max-h-[40px] lg:max-h-[50px] w-auto object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.7)] ${
-                      idx > 0 ? '-mt-3.5' : ''
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* 03 Queso */}
-              <div
-                className={`relative z-30 -mb-6 sm:-mb-8 w-[72%] transition-all duration-300 ease-out ${
-                  showQueso ? 'opacity-100 translate-y-0 scale-100' : 'pointer-events-none h-0 overflow-hidden opacity-0 -translate-y-5 scale-95'
-                }`}
-              >
-                {selectedQueso.imagen && (
-                  <img
-                    key={selectedQueso.id}
-                    src={selectedQueso.imagen}
-                    alt={selectedQueso.nombre}
-                    width={selectedQueso.width}
-                    height={selectedQueso.height}
-                    className="mx-auto h-auto max-h-[48px] sm:max-h-[65px] lg:max-h-[82px] w-auto object-contain drop-shadow-[0_10px_14px_rgba(0,0,0,0.75)]"
-                  />
-                )}
-              </div>
-
-              {/* 02 Carne */}
-              <div
-                className={`relative z-20 -my-2 w-[76%] transition-all duration-300 ease-out ${
-                  showCarne ? 'opacity-100 translate-y-0 scale-100' : 'pointer-events-none h-0 overflow-hidden opacity-0 -translate-y-6 scale-95'
-                }`}
-              >
-                <img
-                  key={selectedCarne.id}
-                  src={selectedCarne.imagen}
-                  alt={`Medallón de ${selectedCarne.nombre}`}
-                  width={selectedCarne.width}
-                  height={selectedCarne.height}
-                  className="mx-auto h-auto max-h-[54px] sm:max-h-[72px] lg:max-h-[92px] w-auto object-contain drop-shadow-[0_14px_18px_rgba(0,0,0,0.85)]"
-                />
-              </div>
-
-              {/* 01 Pan Bottom */}
-              <div className="relative z-10 -mt-1 w-[74%] transition-transform duration-300 ease-out">
-                <img
-                  key={selectedPan.id + '-bottom'}
-                  src={selectedPan.imagenBottom}
-                  alt={`Base de ${selectedPan.nombre}`}
-                  width={selectedPan.bottomWidth}
-                  height={selectedPan.bottomHeight}
-                  className="mx-auto h-auto max-h-[48px] sm:max-h-[64px] lg:max-h-[82px] w-auto object-contain drop-shadow-[0_18px_24px_rgba(0,0,0,0.9)]"
-                />
-              </div>
+            {/*
+              Fixed-size stage (container query units): every layer is absolutely positioned and only
+              animates transform/opacity, so the page never reflows. Each layer drops from above into
+              its slot; the top bun always rests on the highest visible layer. Fully reversible.
+            */}
+            <div
+              className="burger-stage relative h-[200px] w-full max-w-[300px] sm:h-[300px] sm:max-w-[390px] lg:h-[440px] lg:max-w-[460px]"
+              style={{ containerType: 'size' }}
+            >
+              {(() => {
+                type Layer = { key: string; src: string | undefined; alt: string; w?: number; h?: number; slot: number; box: number; width: string; visible: boolean; z: number };
+                const veg = selectedVegs.slice(0, 3);
+                const layers: Layer[] = [
+                  { key: 'pan-b-' + selectedPan.id, src: selectedPan.imagenBottom, alt: `Base de ${selectedPan.nombre}`, w: selectedPan.bottomWidth, h: selectedPan.bottomHeight, slot: 13, box: 20, width: '74%', visible: true, z: 10 },
+                  { key: 'carne-' + selectedCarne.id, src: selectedCarne.imagen, alt: `Medallón de ${selectedCarne.nombre}`, w: selectedCarne.width, h: selectedCarne.height, slot: 12, box: 21, width: '78%', visible: showCarne, z: 20 },
+                  { key: 'queso-' + selectedQueso.id, src: selectedQueso.imagen ?? undefined, alt: selectedQueso.nombre, w: selectedQueso.width, h: selectedQueso.height, slot: 6, box: 18, width: '76%', visible: showQueso, z: 30 },
+                  ...veg.map((v, i) => ({ key: 'veg-' + v.id, src: v.imagen, alt: v.nombre, w: v.width, h: v.height, slot: 5, box: 12, width: '76%', visible: showVegetales, z: 40 + i })),
+                  ...selectedExtras.map((x, i) => ({ key: 'extra-' + x.id, src: x.imagen, alt: x.nombre, w: x.width, h: x.height, slot: 6, box: 13, width: '74%', visible: showExtras, z: 50 + i })),
+                  { key: 'salsa-' + selectedSalsa.id, src: selectedSalsa.imagen ?? undefined, alt: selectedSalsa.nombre, w: selectedSalsa.width, h: selectedSalsa.height, slot: 3, box: 11, width: '70%', visible: showSalsa, z: 58 },
+                ];
+                const BASE = 6; // cqh from the bottom of the stage
+                let y = BASE;
+                const placed = layers.map((l) => {
+                  const at = y;
+                  if (l.visible && l.src) y += l.slot;
+                  return { ...l, at };
+                });
+                const topAt = y - 6; // the crown overlaps the last layer slightly
+                return (
+                  <>
+                    <div aria-hidden="true" className="burger-shadow" />
+                    {placed.map((l) =>
+                      l.src ? (
+                        <div
+                          key={l.key}
+                          className="burger-layer"
+                          style={{
+                            width: l.width,
+                            height: `${l.box}cqh`,
+                            zIndex: l.z,
+                            transform: `translate(-50%, ${-(l.visible ? l.at : l.at + 34)}cqh)`,
+                            opacity: l.visible ? 1 : 0,
+                          }}
+                        >
+                          <img src={l.src} alt={l.alt} width={l.w} height={l.h} decoding="async" draggable={false} />
+                        </div>
+                      ) : null
+                    )}
+                    <div
+                      key={'pan-t-' + selectedPan.id}
+                      className="burger-layer burger-crown"
+                      style={{ width: '74%', height: '30cqh', zIndex: 70, transform: `translate(-50%, ${-topAt}cqh)` }}
+                    >
+                      <img src={selectedPan.imagen} alt={`Parte superior de ${selectedPan.nombre}`} width={selectedPan.width} height={selectedPan.height} decoding="async" draggable={false} />
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             <p className="mt-1 hidden text-center text-[11px] tracking-wider text-[#F5EFE6]/45 uppercase lg:block">
