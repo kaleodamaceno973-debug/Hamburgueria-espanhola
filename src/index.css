@@ -1,0 +1,137 @@
+@import "tailwindcss";
+@import "@fontsource/bowlby-one/latin-400.css";
+@import "@fontsource/archivo-black/latin-400.css";
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-500.css";
+@import "@fontsource/inter/latin-600.css";
+@import "@fontsource/inter/latin-700.css";
+
+@layer base {
+  :root {
+    --bg-carbon: #0B0B0B;
+    --ember-orange: #E9632D;
+    --bone-white: #F5EFE6;
+    --ember-red: #FF3B2E;
+    --flame-gold: #FFB23F;
+  }
+
+  html,
+  body {
+    background-color: #0B0B0B;
+    color: #F5EFE6;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Ensure 16px+ on inputs for iOS Safari */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+.font-display {
+  font-family: 'Bowlby One', 'Archivo Black', system-ui, sans-serif;
+  letter-spacing: -0.015em;
+}
+
+.font-display-tight {
+  font-family: 'Archivo Black', 'Bowlby One', system-ui, sans-serif;
+  letter-spacing: -0.03em;
+}
+
+/* Line mask reveal container */
+.line-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.line-mask > .line-inner {
+  display: block;
+  will-change: transform;
+}
+
+/* Subtle static charcoal grain / heat atmosphere without animated SVG filters */
+.charcoal-vignette {
+  background: radial-gradient(
+    ellipse 75% 60% at 50% 65%,
+    rgba(233, 99, 45, 0.14) 0%,
+    rgba(255, 59, 46, 0.06) 38%,
+    rgba(11, 11, 11, 0.92) 78%,
+    #0B0B0B 100%
+  );
+}
+
+.ember-glow-static {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(233, 99, 45, 0.24) 0%,
+    rgba(255, 59, 46, 0.1) 42%,
+    transparent 72%
+  );
+}
+
+/* Picoteo black background blend mask (no mix-blend-mode during scroll!) */
+.picoteo-mask {
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 54%, transparent 88%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 54%, transparent 88%);
+}
+
+/* Double-ellipse stamp geometry inspired by official Bilbo Burger logo */
+.seal-ellipse {
+  border-radius: 9999px;
+  border: 2px solid #E9632D;
+  position: relative;
+}
+
+.seal-ellipse::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 9999px;
+  border: 1px solid rgba(233, 99, 45, 0.55);
+  pointer-events: none;
+}
+
+/* Dialog backdrop styling */
+dialog.bilbo-dialog::backdrop {
+  background: rgba(5, 5, 5, 0.86);
+}
+
+dialog.bilbo-dialog[open] {
+  animation: dialog-pop 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dialog-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Rotating stamp animation (pure transform, compositor only) */
+@keyframes slow-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-stamp-spin {
+  animation: slow-spin 22s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-stamp-spin {
+    animation: none;
+  }
+}
