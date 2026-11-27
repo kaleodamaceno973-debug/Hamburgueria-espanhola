@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Check, Copy, Flame } from 'lucide-react';
@@ -28,6 +28,39 @@ export default function HazlaTuyaConfigurator({
   scrollToTarget,
 }: HazlaTuyaConfiguratorProps) {
   const sectionRef = useRef<HTMLElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const progressRef = useRef(0); // continuous 0..5, follows the scroll (scrubbed)
+
+  // Scroll-continuous assembly: every frame of the scrub positions each layer from `progressRef`.
+  // Only transform/opacity are written (compositor-only), nothing re-renders in React.
+  const applyStage = (p: number) => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const u = stage.clientHeight / 100; // 1cqh in px
+    const clamp = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+    let y = 6; // cqh from the bottom
+    let flash = 0;
+    stage.querySelectorAll<HTMLElement>('[data-layer]').forEach((el) => {
+      const step = Number(el.dataset.step);
+      const stag = Number(el.dataset.stag || 0);
+      const slot = Number(el.dataset.slot);
+      const t = step === 0 ? 1 : clamp((p - (step - 1) - stag) / 0.6);
+      const e = 1 - Math.pow(1 - t, 3);
+      const land = clamp((t - 0.72) / 0.28);
+      const sq = Math.sin(land * Math.PI) * 0.09;
+      flash = Math.max(flash, Math.sin(land * Math.PI));
+      const drop = (1 - e) * 58;
+      el.style.transform = `translate3d(-50%, ${-(y + drop) * u}px, 0) scale(${1 + sq * 0.7}, ${1 - sq})`;
+      el.style.opacity = String(Math.min(1, t * 2.4));
+      y += slot * e;
+    });
+    const crown = stage.querySelector<HTMLElement>('[data-crown]');
+    if (crown) crown.style.transform = `translate3d(-50%, ${-(y - 7.5) * u}px, 0)`;
+    const glow = stage.querySelector<HTMLElement>('[data-glow]');
+    if (glow) glow.style.opacity = String(0.35 + 0.15 * (p / 5) + 0.45 * flash);
+    const cam = stage.querySelector<HTMLElement>('[data-cam]');
+    if (cam) cam.style.transform = `translate3d(0, ${(p / 5) * 2 * u}px, 0) scale(${0.94 + 0.08 * (p / 5)})`;
+  };
   const triggerRef = useRef<ScrollTrigger | null>(null);
 
   const [activeStep, setActiveStep] = useState(0);
@@ -57,6 +90,17 @@ export default function HazlaTuyaConfigurator({
     });
   }, []);
 
+  // Re-apply after every render (chip changes swap images) and on resize; reduced motion = finished burger
+  useLayoutEffect(() => {
+    applyStage(reducedMotion ? 5 : progressRef.current);
+  });
+  useEffect(() => {
+    const onResize = () => applyStage(reducedMotion ? 5 : progressRef.current);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reducedMotion]);
+
   // ScrollTrigger scrubbed over plain state object { step: 0..5 }
   useEffect(() => {
     if (reducedMotion) return;
@@ -67,9 +111,20 @@ export default function HazlaTuyaConfigurator({
     let lastRounded = 0;
 
     const ctx = gsap.context(() => {
+      // onUpdate lives on the TWEEN (fires on every smoothed scrub frame), not on the ScrollTrigger
+      // (which only fires on raw scroll events and would freeze the burger mid-way when the finger stops).
       const tween = gsap.to(state, {
         step: 5,
         ease: 'none',
+        onUpdate: () => {
+          progressRef.current = state.step;
+          applyStage(state.step);
+          const nextStep = Math.min(5, Math.max(0, Math.floor(state.step + 0.25)));
+          if (nextStep !== lastRounded) {
+            lastRounded = nextStep;
+            setActiveStep(nextStep);
+          }
+        },
         scrollTrigger: {
           trigger: el,
           start: 'top top',
@@ -77,13 +132,6 @@ export default function HazlaTuyaConfigurator({
           pin: true,
           scrub: 0.6,
           invalidateOnRefresh: true,
-          onUpdate: () => {
-            const nextStep = Math.min(5, Math.max(0, Math.round(state.step)));
-            if (nextStep !== lastRounded) {
-              lastRounded = nextStep;
-              setActiveStep(nextStep);
-            }
-          },
         },
       });
       triggerRef.current = tween.scrollTrigger ?? null;
@@ -238,58 +286,55 @@ export default function HazlaTuyaConfigurator({
               its slot; the top bun always rests on the highest visible layer. Fully reversible.
             */}
             <div
-              className="burger-stage relative h-[200px] w-full max-w-[300px] sm:h-[300px] sm:max-w-[390px] lg:h-[440px] lg:max-w-[460px]"
+              ref={stageRef}
+              className="burger-stage relative h-[200px] w-full max-w-[300px] sm:h-[300px] sm:max-w-[390px] lg:h-[460px] lg:max-w-[480px]"
               style={{ containerType: 'size' }}
             >
-              {(() => {
-                type Layer = { key: string; src: string | undefined; alt: string; w?: number; h?: number; slot: number; box: number; width: string; visible: boolean; z: number };
-                const veg = selectedVegs.slice(0, 3);
-                const layers: Layer[] = [
-                  { key: 'pan-b-' + selectedPan.id, src: selectedPan.imagenBottom, alt: `Base de ${selectedPan.nombre}`, w: selectedPan.bottomWidth, h: selectedPan.bottomHeight, slot: 13, box: 20, width: '74%', visible: true, z: 10 },
-                  { key: 'carne-' + selectedCarne.id, src: selectedCarne.imagen, alt: `Medallón de ${selectedCarne.nombre}`, w: selectedCarne.width, h: selectedCarne.height, slot: 12, box: 21, width: '78%', visible: showCarne, z: 20 },
-                  { key: 'queso-' + selectedQueso.id, src: selectedQueso.imagen ?? undefined, alt: selectedQueso.nombre, w: selectedQueso.width, h: selectedQueso.height, slot: 6, box: 18, width: '76%', visible: showQueso, z: 30 },
-                  ...veg.map((v, i) => ({ key: 'veg-' + v.id, src: v.imagen, alt: v.nombre, w: v.width, h: v.height, slot: 5, box: 12, width: '76%', visible: showVegetales, z: 40 + i })),
-                  ...selectedExtras.map((x, i) => ({ key: 'extra-' + x.id, src: x.imagen, alt: x.nombre, w: x.width, h: x.height, slot: 6, box: 13, width: '74%', visible: showExtras, z: 50 + i })),
-                  { key: 'salsa-' + selectedSalsa.id, src: selectedSalsa.imagen ?? undefined, alt: selectedSalsa.nombre, w: selectedSalsa.width, h: selectedSalsa.height, slot: 3, box: 11, width: '70%', visible: showSalsa, z: 58 },
-                ];
-                const BASE = 6; // cqh from the bottom of the stage
-                let y = BASE;
-                const placed = layers.map((l) => {
-                  const at = y;
-                  if (l.visible && l.src) y += l.slot;
-                  return { ...l, at };
-                });
-                const topAt = y - 6; // the crown overlaps the last layer slightly
-                return (
-                  <>
-                    <div aria-hidden="true" className="burger-shadow" />
-                    {placed.map((l) =>
-                      l.src ? (
-                        <div
-                          key={l.key}
-                          className="burger-layer"
-                          style={{
-                            width: l.width,
-                            height: `${l.box}cqh`,
-                            zIndex: l.z,
-                            transform: `translate(-50%, ${-(l.visible ? l.at : l.at + 34)}cqh)`,
-                            opacity: l.visible ? 1 : 0,
-                          }}
-                        >
-                          <img src={l.src} alt={l.alt} width={l.w} height={l.h} decoding="async" draggable={false} />
-                        </div>
-                      ) : null
-                    )}
-                    <div
-                      key={'pan-t-' + selectedPan.id}
-                      className="burger-layer burger-crown"
-                      style={{ width: '74%', height: '30cqh', zIndex: 70, transform: `translate(-50%, ${-topAt}cqh)` }}
-                    >
-                      <img src={selectedPan.imagen} alt={`Parte superior de ${selectedPan.nombre}`} width={selectedPan.width} height={selectedPan.height} decoding="async" draggable={false} />
-                    </div>
-                  </>
-                );
-              })()}
+              <div aria-hidden="true" data-glow className="burger-glow" />
+              <div aria-hidden="true" className="burger-smoke burger-smoke--a" />
+              <div aria-hidden="true" className="burger-smoke burger-smoke--b" />
+              <div data-cam className="burger-cam">
+                <div aria-hidden="true" className="burger-shadow" />
+                {(() => {
+                  type L = { key: string; src?: string | null; alt: string; w?: number; h?: number; step: number; stag?: number; slot: number; box: number; width: string; z: number };
+                  const veg = selectedVegs.slice(0, 3);
+                  const layers: L[] = [
+                    { key: 'pan-b-' + selectedPan.id, src: selectedPan.imagenBottom, alt: `Base de ${selectedPan.nombre}`, w: selectedPan.bottomWidth, h: selectedPan.bottomHeight, step: 0, slot: 11, box: 15, width: '78%', z: 10 },
+                    { key: 'carne-' + selectedCarne.id, src: selectedCarne.imagen, alt: `Medallón de ${selectedCarne.nombre}`, w: selectedCarne.width, h: selectedCarne.height, step: 1, slot: 11, box: 17, width: '80%', z: 20 },
+                    { key: 'queso-' + selectedQueso.id, src: selectedQueso.imagen, alt: selectedQueso.nombre, w: selectedQueso.width, h: selectedQueso.height, step: 2, slot: 4, box: 20, width: '70%', z: 30 },
+                    ...veg.map((v, i) => ({ key: 'veg-' + v.id, src: v.imagen, alt: v.nombre, w: v.width, h: v.height, step: 3, stag: i * 0.2, slot: 3.2, box: 9, width: '78%', z: 40 + i })),
+                    ...selectedExtras.slice(0, 3).map((x, i) => ({ key: 'extra-' + x.id, src: x.imagen, alt: x.nombre, w: x.width, h: x.height, step: 4, stag: i * 0.2, slot: 3.6, box: 11, width: '76%', z: 50 + i })),
+                    { key: 'salsa-' + selectedSalsa.id, src: selectedSalsa.imagen, alt: selectedSalsa.nombre, w: selectedSalsa.width, h: selectedSalsa.height, step: 5, slot: 2, box: 12, width: '72%', z: 58 },
+                  ];
+                  return (
+                    <>
+                      {layers.map((l) =>
+                        l.src ? (
+                          <div
+                            key={l.key}
+                            data-layer
+                            data-step={l.step}
+                            data-stag={l.stag ?? 0}
+                            data-slot={l.slot}
+                            className="burger-layer"
+                            style={{ width: l.width, height: `${l.box}cqh`, zIndex: l.z, opacity: l.step === 0 ? 1 : 0 }}
+                          >
+                            <img src={l.src} alt={l.alt} width={l.w} height={l.h} decoding="async" draggable={false} />
+                          </div>
+                        ) : null
+                      )}
+                      <div
+                        key={'pan-t-' + selectedPan.id}
+                        data-crown
+                        className="burger-layer"
+                        style={{ width: '78%', height: '24cqh', zIndex: 70 }}
+                      >
+                        <img src={selectedPan.imagen} alt={`Parte superior de ${selectedPan.nombre}`} width={selectedPan.width} height={selectedPan.height} decoding="async" draggable={false} />
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
             </div>
 
             <p className="mt-1 hidden text-center text-[11px] tracking-wider text-[#F5EFE6]/45 uppercase lg:block">
@@ -315,7 +360,7 @@ export default function HazlaTuyaConfigurator({
               Tu burger. <span className="text-[#E9632D]">Tus reglas.</span>
             </h2>
 
-            <p className="mt-2.5 text-xs leading-relaxed text-[#F5EFE6]/75 sm:text-sm lg:text-base">
+            <p className="mt-2.5 hidden text-xs leading-relaxed text-[#F5EFE6]/75 sm:block sm:text-sm lg:text-base">
               {NEGOCIO.textos.personalizacionTexto}
             </p>
 

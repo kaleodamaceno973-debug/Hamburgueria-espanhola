@@ -83,9 +83,22 @@ export default function App() {
       document.fonts.ready.then(refreshAll);
     }
     window.addEventListener('load', refreshAll);
+    // Lazy images / late content change the page height after load: re-measure pins when that happens
+    let lastH = document.documentElement.scrollHeight;
+    let t: number | undefined;
+    const ro = new ResizeObserver(() => {
+      const h = document.documentElement.scrollHeight;
+      if (Math.abs(h - lastH) < 2) return;
+      lastH = h;
+      window.clearTimeout(t);
+      t = window.setTimeout(refreshAll, 150);
+    });
+    ro.observe(document.body);
     const timer = window.setTimeout(refreshAll, 500);
 
     return () => {
+      ro.disconnect();
+      window.clearTimeout(t);
       active = false;
       window.removeEventListener('load', refreshAll);
       window.clearTimeout(timer);
